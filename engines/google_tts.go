@@ -40,10 +40,7 @@ func TTS(text string, targetLang string) []byte {
 
 		url := generateTTSUrl(params, strings.TrimSpace(chunk))
 
-		resp, err := ApiRequest(url)
-		if err != nil {
-			panic(err)
-		}
+		resp := ApiRequest(url)
 		if resp.StatusCode != 200 {
 			panic(fmt.Sprintf("Error: %s", resp.Status))
 		}

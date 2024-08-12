@@ -11,9 +11,10 @@ func main() {
 	text := os.Args[3]
 
 	translation := engines.GoogleTranslate(text, source, target)
-	// fmt.Println(translation)
-	// engines.TTSConcurrent(translation, "vi")
-	audio := engines.TTSConcurrent(translation, "vi")
-	os.Stdout.Write(audio)
 
+	engines.TTSConcurrent(translation, "vi")
+	audio := engines.TTSConcurrent(translation, "vi")
+	// engines.TTSConcurrent(translation, "vi")
+
+	os.Stdout.Write(audio)
 }

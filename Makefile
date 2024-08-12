@@ -5,5 +5,9 @@ run:
 	# go run . "en" "vi" $(TEXT)
 	go run . "en" "vi" $(TEXT) | mpv --speed=2.0 --quiet -
 
-build:
-	go build
+build-linux:
+	GOOS=linux GOARCH=amd64 go build -o tool
+
+# build windows binary on linux
+build-win:
+	GOOS=windows GOARCH=amd64 go build -o tool.exe

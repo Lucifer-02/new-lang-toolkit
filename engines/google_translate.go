@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-
 type TransParams struct {
 	Client string
 	Ie     string // input encode
@@ -74,9 +73,9 @@ func GoogleTranslate(text string, sourceLang string, targetLang string) string {
 
 	url := fmt.Sprintf("%sclient=%s&ie=%s&oe=%s&dt=%s&sl=%s&tl=%s&q=%s", baseUrl, params.Client, params.Ie, params.Oe, params.Dt, params.Sl, params.Tl, url.QueryEscape(text))
 
-	response, err := ApiRequest(url)
-	if err != nil {
-		panic(err)
+	response := ApiRequest(url)
+	if response.StatusCode != 200 {
+		panic(fmt.Sprintf("Error: %s", response.Status))
 	}
 
 	body, err := readBody(response)

@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func ApiRequest(url string) (http.Response, error) {
+func ApiRequest(url string) http.Response {
 	assert(url != "", "URL is empty")
 
 	// Make a request
@@ -14,7 +14,7 @@ func ApiRequest(url string) (http.Response, error) {
 		panic(err)
 	}
 
-	return *response, err
+	return *response
 }
 
 type resultChunk struct {
@@ -29,10 +29,7 @@ func ApiRequests(urls []string) []http.Response {
 	channel := make(chan resultChunk)
 	for i, url := range urls {
 		go func(index int, url string) {
-			resp, err := ApiRequest(url)
-			if err != nil {
-				panic(err)
-			}
+			resp := ApiRequest(url)
 			channel <- resultChunk{index, resp}
 		}(i, url)
 	}
@@ -41,6 +38,8 @@ func ApiRequests(urls []string) []http.Response {
 	for i := range len(urls) {
 		results[i] = <-channel
 	}
+
+  assert(len(results) == len(urls), "Invalid results")
 
 	// sort the results
 	sort.Slice(results, func(i, j int) bool {
