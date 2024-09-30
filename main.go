@@ -11,10 +11,10 @@ func main() {
 		//help
 		os.Stdout.Write([]byte("Usage: tool [mode] [source] [target] [text]\n"))
 		os.Stdout.Write([]byte("Modes:\n"))
-		os.Stdout.Write([]byte("tts: Text to speech\n"))
-		os.Stdout.Write([]byte("trans: Translate text\n"))
-		os.Stdout.Write([]byte("trans+tts: Translate text and convert to speech"))
-    return
+		os.Stdout.Write([]byte("\ttts: Text to speech\n"))
+		os.Stdout.Write([]byte("\ttrans: Translate text\n"))
+		os.Stdout.Write([]byte("\ttrans+tts: Translate text and convert to speech"))
+		return
 	}
 
 	mode := os.Args[1]
@@ -33,6 +33,7 @@ func main() {
 		translation := engines.GoogleTranslate(text, source, target)
 		audio := engines.TTSConcurrent(translation, target)
 		os.Stdout.Write(audio)
+		os.WriteFile("out.mp3", audio, 777)
 	default:
 		panic("Invalid mode")
 	}
