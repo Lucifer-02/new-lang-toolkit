@@ -2,12 +2,10 @@ TEXT = "Building off of our last successful Causal Inference and Experimentation
 
 
 run:
-	# go run . "en" "vi" $(TEXT)
-	go run . "en" "vi" $(TEXT) | mpv --speed=2.0 --quiet -
+	# go run . trans+tts "en" "vi" $(TEXT)
+	go run . trans+tts "en" "vi" $(TEXT) | mpv --speed=2.0 --quiet -
 
-build-linux:
+build:
 	GOOS=linux GOARCH=amd64 go build -o tool
-
-# build windows binary on linux
-build-win:
 	GOOS=windows GOARCH=amd64 go build -o tool.exe
+

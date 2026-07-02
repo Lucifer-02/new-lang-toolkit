@@ -1,11 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"tool/engines"
+
+	"github.com/Lucifer-02/new-lang-toolkit/engines"
 )
 
 func main() {
+	// The engines are deliberately fail-fast (they panic). Recover at this
+	// boundary so the user sees a clean error instead of a stack trace.
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "tool: %v\n", r)
+			os.Exit(1)
+		}
+	}()
 
 	if len(os.Args) != 5 {
 		//help
@@ -33,7 +43,9 @@ func main() {
 		translation := engines.GoogleTranslate(text, source, target)
 		audio := engines.TTSConcurrent(translation, target)
 		os.Stdout.Write(audio)
-		os.WriteFile("out.mp3", audio, 777)
+		if err := os.WriteFile("out.mp3", audio, 0o644); err != nil {
+			panic(err)
+		}
 	default:
 		panic("Invalid mode")
 	}

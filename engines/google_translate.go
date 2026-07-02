@@ -3,8 +3,6 @@ package engines
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"strings"
 )
@@ -18,41 +16,34 @@ type TransParams struct {
 	Tl     string // target language
 }
 
-func RequestTrans(url string) (http.Response, error) {
-	assert(url != "", "URL is empty")
-
-	// Make a request
-	response, err := http.Get(url)
-
-	return *response, err
-}
-
-func readBody(response http.Response) ([]byte, error) {
-	assert(response.StatusCode == 200, "Request failed")
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
+func asSlice(v any, msg string) []any {
+	s, ok := v.([]any)
+	assert(ok, msg)
+	return s
 }
 
 func extractTranslation(body []byte) []string {
 	assert(len(body) > 0, "No response from server")
 
-	var jsonData []interface{}
-	json.Unmarshal(body, &jsonData)
-
 	//an example of the body is this: [[["CHÀO","hi",null,null,10]],null,"en",null,null,null,0.77704483,[],[["en"],null,[0.77704483],["en"]]],
 	//only get CHÀO
 
+	var jsonData []interface{}
+	if err := json.Unmarshal(body, &jsonData); err != nil {
+		panic(fmt.Sprintf("failed to parse translation response: %v", err))
+	}
+	assert(len(jsonData) > 0, "unexpected translation response shape")
+
 	result := []string{}
-	for _, data := range jsonData[0].([]any) {
+	for _, data := range asSlice(jsonData[0], "unexpected translation response shape") {
 		if data == nil {
 			continue
 		}
-		result = append(result, data.([]any)[0].(string))
+		segment := asSlice(data, "unexpected translation segment shape")
+		assert(len(segment) > 0, "unexpected translation segment shape")
+		text, ok := segment[0].(string)
+		assert(ok, "unexpected translation segment shape")
+		result = append(result, text)
 	}
 
 	assert(len(result) > 0, "No translation found")
@@ -73,15 +64,6 @@ func GoogleTranslate(text string, sourceLang string, targetLang string) string {
 
 	url := fmt.Sprintf("%sclient=%s&ie=%s&oe=%s&dt=%s&sl=%s&tl=%s&q=%s", baseUrl, params.Client, params.Ie, params.Oe, params.Dt, params.Sl, params.Tl, url.QueryEscape(text))
 
-	response := ApiRequest(url)
-	if response.StatusCode != 200 {
-		panic(fmt.Sprintf("Error: %s", response.Status))
-	}
-
-	body, err := readBody(response)
-	if err != nil {
-		panic(err)
-	}
-
+	body := ApiRequest(url)
 	return strings.Join(extractTranslation(body), "")
 }
